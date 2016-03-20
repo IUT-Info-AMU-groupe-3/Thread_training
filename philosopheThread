@@ -1,0 +1,39 @@
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <vector>
+using namespace std;
+
+namespace{
+    const int N = 8;
+    mutex fourch[N];
+    void prendre_fourchette(int i){
+        fourch[i].lock();
+        fourch[(i+1)%N].lock();
+        cout << "philosophe : " << i << " a prit une fourchette\n" <<flush;
+    }
+
+    void poser_fourchette(int i){
+        cout << "philosophe : " << i << " a pose une fourchette" <<endl;
+        fourch[i].unlock();
+        fourch[(i+1)%N].unlock();
+    }
+
+    void philosophe(int i){
+        prendre_fourchette(i);
+        poser_fourchette(i);
+    }
+}
+
+int main(int argc, char *argv[])
+{
+    vector <thread> tasks;
+    cout << "Nombres de coeurs : " << thread::hardware_concurrency() << endl;
+    for(unsigned i =0; i < N;++i){
+        tasks.emplace_back(philosophe,i);
+    }
+
+    for(unsigned i = 0; i < N;++i){
+        tasks[i].join();
+    }
+}
